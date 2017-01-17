@@ -9,19 +9,21 @@ namespace AsyncAwait
     {
         public enum TestIds
         {
-            SequentialImplementationAsync = 0,
-            SequentialImplementationWithReturnValueAsync = 1,
-            ParallelizationAttemptAsync = 2,
-            FullParallelizationAsync = 3,
-            PrettyFullParallelizationAsync = 4,
-            PrettyFullParallelizationWithTimeOutAsync = 5,
-            FireAndForget = 6,
-            FireAndForgetAsync = 7,
-            FullParallelizationWithExceptionAsync = 8,
-            FullParallelizationWithMultipleExceptionAsync = 9,
-            FullParallelizationWithMultipleExceptionWithoutCatchAsync = 10,
-            ConfigureAwaitFalseAsync = 11,
-            ConfigureAwaitTrueAsync = 12,
+            SequentialImplementationAsync,
+            SequentialImplementationWithReturnValueAsync,
+            ParallelizationAttemptAsync,
+            FullParallelizationAsync,
+            PrettyFullParallelizationAsync,
+            PrettyFullParallelizationWithTimeOutAsync,
+            FireAndForget,
+            FireAndForgetAsync,
+            FullParallelizationWithExceptionAsync,
+            FullParallelizationWithMultipleExceptionAsync,
+            FullParallelizationWithMultipleExceptionWithoutCatchAsync,
+            ConfigureAwaitFalseAsync,
+            ConfigureAwaitTrueAsync,
+            ConfigureAwaitTrueWithAwaitAsync,
+            ConfigureAwaitFalseWithAwaitAsync
         }
 
         public async void Run(TestIds testId)
@@ -73,6 +75,12 @@ namespace AsyncAwait
                     case TestIds.ConfigureAwaitTrueAsync:
                         result = await ConfigureAwaitTrueAsync();
                         break;
+                    case TestIds.ConfigureAwaitTrueWithAwaitAsync:
+                        result = await ConfigureAwaitTrueWithAwaitAsync();
+                        break;
+                    case TestIds.ConfigureAwaitFalseWithAwaitAsync:
+                        result = await ConfigureAwaitFalseWithAwaitAsync();
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(testId), testId, null);
                 }
@@ -89,34 +97,55 @@ namespace AsyncAwait
 
         private Task<string> ConfigureAwaitTrueAsync()
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting ConfigureAwaitTrueAsync Implementation ...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting ConfigureAwaitTrueAsync Implementation ...");
 
             var resource = new DummyDelayResource();
             resource.ReadFileAsync().ConfigureAwait(true);
             resource.GetRandomNumberAsync().ConfigureAwait(true);
 
-            Console.WriteLine($"[{DateTime.Now}] End ConfigureAwaitTrueAsync Implementation.");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] End ConfigureAwaitTrueAsync Implementation.");
             return Task.FromResult("As Fire and Forget ...");
         }
 
         private Task<string> ConfigureAwaitFalseAsync()
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting ConfigureAwaitFalseAsync Implementation ...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting ConfigureAwaitFalseAsync Implementation ...");
 
             var resource = new DummyDelayResource();
             resource.ReadFileAsync().ConfigureAwait(false);
             resource.GetRandomNumberAsync().ConfigureAwait(false);
 
-            Console.WriteLine($"[{DateTime.Now}] End ConfigureAwaitFalseAsync Implementation.");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] End ConfigureAwaitFalseAsync Implementation.");
             return Task.FromResult("As Fire and Forget ...");
+        }
+
+        private async Task<string> ConfigureAwaitTrueWithAwaitAsync()
+        {
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting ConfigureAwaitTrueWithAwaitAsync Implementation ...");
+
+            var resource = new DummyDelayResource();
+            await resource.ReadFileAsync().ConfigureAwait(true);
+            await resource.GetRandomNumberAsync().ConfigureAwait(true);
+
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] End ConfigureAwaitTrueWithAwaitAsync Implementation.");
+            return string.Empty;
+        }
+
+        private async Task<string> ConfigureAwaitFalseWithAwaitAsync()
+        {
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting ConfigureAwaitFalseWithAwaitAsync Implementation ...");
+
+            var resource = new DummyDelayResource();
+            await resource.ReadFileAsync().ConfigureAwait(false);
+            await resource.GetRandomNumberAsync().ConfigureAwait(false);
+
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] End ConfigureAwaitFalseWithAwaitAsync Implementation.");
+            return string.Empty;
         }
 
         private async Task<string> FullParallelizationWithExceptionAsync()
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting FullParallelizationWithExceptionAsync Implementation ...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting FullParallelizationWithExceptionAsync Implementation ...");
 
             var resource = new DummyDelayResource();
             await resource.ReadFileAsync();
@@ -129,8 +158,7 @@ namespace AsyncAwait
 
         private async Task<string> FullParallelizationWithMultipleExceptionAsync()
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting FullParallelizationWithMultipleExceptionAsync Implementation ...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting FullParallelizationWithMultipleExceptionAsync Implementation ...");
 
             var resource = new DummyDelayResource();
             var descriptors = new List<Task>
@@ -215,8 +243,7 @@ namespace AsyncAwait
 
         private async Task<string> FullParallelizationWithMultipleExceptionWithoutCatchAsync()
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting FullParallelizationWithMultipleExceptionWithoutCatchAsync Implementation ...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting FullParallelizationWithMultipleExceptionWithoutCatchAsync Implementation ...");
 
             var resource = new DummyDelayResource();
             var descriptors = new List<Task>
@@ -259,8 +286,7 @@ namespace AsyncAwait
 
         private async Task<string> SequentialImplementationAsync(string message)
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting Sequential Implementation ...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting Sequential Implementation ...");
 
             var resource = new DummyDelayResource();
             await resource.ReadFileAsync();
@@ -273,8 +299,7 @@ namespace AsyncAwait
 
         private async Task<string> SequentialImplementationWithReturnValueAsync(string message)
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting Sequential Implementation With Return Value ...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting Sequential Implementation With Return Value ...");
 
             var resource = new DummyDelayResource();
             await resource.ReadFileAsync();
@@ -287,8 +312,7 @@ namespace AsyncAwait
 
         private async Task<string> ParallelizationAttemptAsync(string message)
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting Parallelization Attempt...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting Parallelization Attempt...");
 
             var resource = new DummyDelayResource();
             var emailTask = resource.ReadFileAsync();
@@ -302,8 +326,7 @@ namespace AsyncAwait
 
         private async Task<string> FullParallelizationAsync(string message)
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting Full Parallelization...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting Full Parallelization...");
 
             var resource = new DummyDelayResource();
             var emailTask = resource.ReadFileAsync();
@@ -320,8 +343,7 @@ namespace AsyncAwait
 
         private async Task<string> PrettyFullParallelizationAsync(string message)
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting Full Parallelization...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting Full Parallelization...");
 
             var resource = new DummyDelayResource();
 
@@ -340,8 +362,7 @@ namespace AsyncAwait
 
         private async Task<string> PrettyFullParallelizationWithTimeOutAsync(string message)
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting Full Parallelization With Timeout 1 sec...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting Full Parallelization With Timeout 1 sec...");
 
             var resource = new DummyDelayResource();
 
@@ -360,8 +381,7 @@ namespace AsyncAwait
 
         private async Task<string> FireAndForgetAsync(string message)
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting FireAndForget Async ...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting FireAndForget Async ...");
 
             var resource = new DummyDelayResource();
             await Task.Run(() => resource.ReadFileAsync());
@@ -374,8 +394,7 @@ namespace AsyncAwait
 
         private string FireAndForget(string message)
         {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine($"Thread id:[{threadId}] - [{DateTime.Now}] Starting FireAndForget ...");
+            Console.WriteLine($"Thread id:[{Thread.CurrentThread.ManagedThreadId}] - [{DateTime.Now}] Starting FireAndForget ...");
 
             var resource = new DummyDelayResource();
             Task.Run(() => resource.ReadFileAsync());

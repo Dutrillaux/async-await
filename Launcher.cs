@@ -17,7 +17,7 @@ namespace AsyncAwait
 
             try
             {
-                var testIdSelected = AsyncMethods.TestIds.ConfigureAwaitFalseAsync;
+                var testIdSelected = AsyncMethods.TestIds.ConfigureAwaitTrueWithAwaitAsync;
 
                 new AsyncMethods().Run(testIdSelected);
             }
